@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-deployment
+  namespace: default
+  labels:
+    app: example
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: example
+  template:
+    metadata:
+      labels:
+        app: example
+    spec:
+      imagePullSecrets:
+        - name: <secret-name>
+      containers:
+        - name: example-container
+          image: example-image:latest
+          imagePullPolicy: Always
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "echo Hello World"
+          args: ["arg1", "arg2"]
+          env:
+            - name: ENV_VAR_NAME
+              value: "env_var_value"
+            - name: ENV_VAR_FROM_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: password
+          envFrom:
+            - configMapRef:
+                name: example-config
+            - secretRef:
+                name: my-secret
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /mnt/data
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            failureThreshold: 3
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 3000
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: ["NET_ADMIN"]
+      initContainers:
+        - name: init-container
+          image: init-image:latest
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "echo Initializing"
+          volumeMounts:
+            - name: shared-storage
+              mountPath: /mnt/data
+              readOnly: true
+      volumes:
+        - name: shared-storage
+          emptyDir: {}
+      nodeSelector:
+        disktype: ssd
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - example
+              topologyKey: kubernetes.io/hostname
+      tolerations:
+        - key: "example-key"
+          operator: "Equal"
+          value: "example-value"
+          effect: "NoSchedule"
+      terminationGracePeriodSeconds: 30
+      restartPolicy: Always
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+
+# terminationGracePeriodSeconds: Specifies the time Kubernetes should wait before forcefully killing a pod.
+# strategy: Defines the deployment strategy, e.g., rolling updates with options like maxSurge and maxUnavailable.

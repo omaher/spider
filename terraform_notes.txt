@@ -1,0 +1,60 @@
+Variables
+Simple variables(String, Boolean, Number)
+Complex variables- List(Ordered), Set(Order and Unique), Map(Key= value), Object(like map but differnet type supported), Tuple)(like list different type supported)
+
+
+Store statefile on s3 bucket - 
+resource "aws_s3_bucket" "tf_state" {}
+resource "aws_dynamodb_table" "tf_locks" {}
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state-bucket"
+    key            = "global/s3/terraform.tfstate"  # This is the path inside the bucket
+    region         = "us-east-1"
+    dynamodb_table = "terraform-locks"              # For state locking
+    encrypt        = true
+  }
+}
+
+modules - 
+provider, resource, variable, output, module
+
+Override present resource in tf_locks
+1. Define the Resource in Terraform Code
+
+resource "aws_instance" "my_ec2" {
+  # These fields are just placeholders or should match the existing config
+  ami           = "ami-0abcdef1234567890"
+  instance_type = "t2.micro"
+}
+
+ 2. Use the terraform import Command
+ terraform import aws_instance.my_ec2 i-0a1b2c3d4e5f6g7h8
+ terraform import <resource_type>.<resource_name> <resource_id>
+
+ 3. Run terraform plan and Sync Code
+ terraform plan
+
+ Multi Cloud or Multi region automation
+
+ provider "aws" {
+  alias  = "us_east"
+  region = "us-east-1"
+}
+
+provider "aws" {
+  alias  = "us_west"
+  region = "us-west-2"
+}
+
+Then in your resources, specify which provider to use:
+
+resource "aws_instance" "east_server" {
+  provider = aws.us_east
+  # other config...
+}
+
+resource "aws_instance" "west_server" {
+  provider = aws.us_west
+  # other config...
+}

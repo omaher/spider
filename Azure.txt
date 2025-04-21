@@ -1,0 +1,6 @@
+Azure Virtual Machines (VMs)
+Azure Functions(Serverless)
+Azure SQL Database, Azure Database for MySQL/PostgreSQL/MariaDB
+Azure Blob Storage, Azure Disk Storage, Azure File Storage
+Azure Virtual Network (VNet), Azure DNS
+Azure Active Directory (Azure AD), Azure Key Vault

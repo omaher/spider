@@ -1,0 +1,92 @@
+open(), read(), write(), close() // methods
+
+"r" – Read, "w" – Write (creates file if it doesn’t exist, overwrites if it does)
+"a" – Append (creates file if it doesn’t exist), "r+" – Read and write
+
+with open(file.txt,'r') as src:
+
+#Read from one file and write to other file
+with open("source.txt", "r") as src, open("dest.txt", "w") as dest:
+    for line in src:
+        dest.write(line.upper())  # Write in uppercase
+
+IF condition
+i = 10
+if (i < 9) & (i == 5):
+    print("This condition is true")
+elif
+if type(s) == str:
+
+##########
+m = []
+for i in l:
+    if type(i)=="str":
+        m.append(i)
+
+for i in "sudh":
+    print(i)
+
+############
+
+l = [5,6,7,"om"]
+for i in range(len(l)):
+    print(l[i])
+
+a = int(intput("Enter the age"))
+
+Operation in single line
+
+[i[2] for i in l]
+
+l= [2,5,4,2,2,6]
+while 2 in l:
+    l.remove(2)
+###################
+
+methods - find(), append(), reverse(), sort()
+
+---------------------------------------
+
+#Execute a shell command from Python
+import subprocess
+def run_command(command):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return result.stdout
+
+#Monitor a URL’s response code using Python
+import requests
+
+def check_url_status(url):
+    try:
+        response = requests.get(url)
+        print(f"Status Code: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"Error: {e}")
+
+check_url_status("https://example.com")
+
+A = 'aasjjjsjjfk'
+count = 0
+
+for i in range(len(A) - 1):
+    if A[i] == 'j' and A[i+1] == 'j':
+        count += 1
+
+print("Count of 'jj':", count)
+
+####### How many times no. repeated ####################
+
+numbers = [1, 2, 3, 2, 4, 1, 5, 2, 3]
+
+repeats = {}
+
+for num in numbers:
+    if num in repeats:
+        repeats[num] += 1
+    else:
+        repeats[num] = 1
+
+# Print only repeated numbers
+for num, count in repeats.items():
+    if count > 1:
+        print(f"{num} is repeated {count} times")

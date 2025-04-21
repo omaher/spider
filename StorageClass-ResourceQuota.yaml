@@ -1,0 +1,66 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass  #different types of storage SSDs, HDDs, cloud storage
+metadata:
+  name: fast-storage
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2 # AWS EBS volumes of type gp2
+  fsType: ext4 # filesystem type (e.g., ext4 vs xfs),
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: fast-storage
+  hostPath:
+    path: /mnt/data
+
+#StorageClass defines how storage should be provisioned.
+#PV is the actual storage that gets allocated and used by the cluster.
+
+# StorageClass is not required to create a PV, but it is required for dynamic provisioning (where Kubernetes automatically creates PVs based on PVCs.)
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: example-resource-quota
+  namespace: default
+spec:
+  hard:
+    # Limits the total CPU usage for all pods in the namespace
+    cpu: "10"
+    
+    # Limits the total memory usage for all pods in the namespace
+    memory: "20Gi"
+    
+    # Limits the total number of pods in the namespace
+    pods: "50"
+    
+    # Limits the total number of services in the namespace
+    services: "10"
+    
+    # Limits the total number of persistent volume claims in the namespace
+    persistentvolumeclaims: "5"
+    
+    # Limits the total number of secrets in the namespace
+    secrets: "20"
+    
+    # Limits the total number of config maps in the namespace
+    configmaps: "10"
+    
+    # Limits the total number of deployments in the namespace
+    deployments.apps: "5"
+    
+    # Limits the total number of replicasets in the namespace
+    replicasets.apps: "10"
+    
+    # Limits the total number of StatefulSets in the namespace
+    statefulsets.apps: "3"

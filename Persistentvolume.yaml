@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 10Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  awsElasticBlockStore:
+    volumeID: vol-12345678
+    fsType: ext4
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+      args:
+      - /bin/bash
+      - touch /tmp/healthy;
+      volumeMounts:
+        - mountPath: "/usr/share/nginx/html"
+          name: my-storage
+  volumes:
+    - name: my-storage
+      persistentVolumeClaim:
+        claimName: my-pvc
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: example-service
+spec:
+  selector:
+    app: example
+  ports:
+    - protocol: TCP
+      port: 80  # Exposed port for the service
+      targetPort: 80  # Port on the container
+      nodePort: 30080  # External port on each node
+  type: NodePort  # Makes the service accessible externally on node IP
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+spec:
+  containers:
+  - name: frontend
+    image: myfrontendimage
+    env:
+    - name: BACKEND_URL
+      value: "http://backend.production.svc.cluster.local"
+
+
+#Internal Communication: FQDNs are used within the cluster to allow pods and services to discover each other dynamically via DNS (<service-name>.<namespace>.svc.cluster.local).
+#External DNS: Services can be exposed externally using FQDNs (with LoadBalancer, Ingress, or ExternalDNS).
+
+
+#livenessProbe: check if application is healthy and capable of processing the request
+#readinessProbe: Checks if application is ready to start the processing the traffic
+# PreStop Hook and PostStart Hook for containers
